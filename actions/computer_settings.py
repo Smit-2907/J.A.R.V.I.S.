@@ -1,5 +1,5 @@
 # actions/computer_settings.py
-# MARK XXV — Computer Settings & UI Controls
+# Mark II — Computer Settings & UI Controls
 #
 # Kullanıcı "sesi aç", "uygulamayı kapat", "tam ekran yap", "şunu yaz" gibi
 # bilgisayar kontrol komutları verdiğinde bu dosya devreye girer.
@@ -8,6 +8,7 @@
 # - Cross-platform: Windows / macOS / Linux
 # - pyautogui + platform-specific API'ler
 
+import os
 import time
 import subprocess
 import sys
@@ -36,12 +37,9 @@ def get_base_dir() -> Path:
     return Path(__file__).resolve().parent.parent
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
-import json
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    return os.getenv("GEMINI_API_KEY")
 
 
 def volume_up():
@@ -609,7 +607,7 @@ def computer_settings(
         value       : İşleme özgü değer (ses seviyesi, yazılacak metin, tekrar sayısı vb.)
     """
     if not _PYAUTOGUI:
-        return "pyautogui is not installed. Run: pip install pyautogui"
+        return "pyautogui is not installed. Recommended: 'uv pip install pyautogui' (or pip install pyautogui)"
 
     params      = parameters or {}
     raw_action  = params.get("action", "").strip()

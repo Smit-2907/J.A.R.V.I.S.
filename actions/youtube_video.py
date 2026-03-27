@@ -1,5 +1,5 @@
 # actions/youtube_video.py
-# MARK XXV — YouTube Controller
+# Mark II — YouTube Controller
 #
 # Features:
 #   - play      : Search and play a YouTube video (original feature, preserved)
@@ -7,6 +7,7 @@
 #   - get_info  : Video title, channel, views, duration (scraping)
 #   - trending  : Fetch trending videos for a region
 
+import os
 import json
 import re
 import sys
@@ -40,7 +41,6 @@ def get_base_dir() -> Path:
 
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
 HEADERS = {
     "User-Agent": (
@@ -53,8 +53,7 @@ HEADERS = {
 
 
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    return os.getenv("GEMINI_API_KEY")
 
 
 def open_browser():

@@ -1,5 +1,5 @@
 # actions/computer_control.py
-# MARK XXV — Computer Control
+# Mark II — Computer Control
 #
 # Atomic computer control functions using PyAutoGUI + keyboard + clipboard.
 # Used by the agent when no existing action file covers the task.
@@ -17,6 +17,7 @@
 #   - Hotkey sequences
 #   - Find and click image/element on screen
 
+import os
 import json
 import sys
 import time
@@ -48,7 +49,6 @@ def get_base_dir() -> Path:
 
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
 
 def _load_user_profile() -> dict:
@@ -72,7 +72,7 @@ def _load_user_profile() -> dict:
 def _ensure_pyautogui():
     if not _PYAUTOGUI:
         raise RuntimeError(
-            "PyAutoGUI not installed. Run: pip install pyautogui"
+            "PyAutoGUI not installed. Recommended: 'uv pip install pyautogui' (or pip install pyautogui)"
         )
 
 
@@ -339,9 +339,7 @@ def _analyze_screen_for_element(description: str) -> tuple[int, int] | None:
         import google.generativeai as genai
         import io
 
-        cfg_path = API_CONFIG_PATH
-        with open(cfg_path, "r") as f:
-            api_key = json.load(f)["gemini_api_key"]
+        api_key = os.getenv("GEMINI_API_KEY")
 
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.5-flash-lite")

@@ -1,5 +1,5 @@
 # actions/flight_finder.py
-# MARK XXV — Flight Finder
+# Mark II — Flight Finder
 #
 # Searches for flights using Google Flights via browser_control.
 # Results are spoken by JARVIS. Optionally saved to Notepad or opened in browser.
@@ -16,6 +16,7 @@
 # Cross-platform: Windows, macOS, Linux
 # No API key required — Google Flights is free to access
 
+import os
 import json
 import re
 import sys
@@ -32,12 +33,10 @@ def get_base_dir() -> Path:
 
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
 
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    return os.getenv("GEMINI_API_KEY")
 
 
 def _parse_date(raw: str) -> str:

@@ -11,6 +11,7 @@
 #   optimize     → Mevcut kodu Gemini ile optimize et (performans, okunabilirlik, best practices)
 #   auto         → (default) Intent auto-detected from context
 
+import os
 import subprocess
 import sys
 import json
@@ -25,15 +26,13 @@ def get_base_dir():
     return Path(__file__).resolve().parent.parent
 
 BASE_DIR           = get_base_dir()
-API_CONFIG_PATH    = BASE_DIR / "config" / "api_keys.json"
 DESKTOP            = Path.home() / "Desktop"
 MAX_BUILD_ATTEMPTS = 3
 GEMINI_MODEL       = "gemini-2.5-flash"
 
 
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    return os.getenv("GEMINI_API_KEY")
 
 
 def _get_gemini(model: str = GEMINI_MODEL):

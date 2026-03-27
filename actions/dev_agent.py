@@ -10,6 +10,7 @@
 #   Planning : gemini-2.5-flash       (architecture, structure, debugging)
 #   Writing  : gemini-2.5-flash-lite  (fast file generation)
 
+import os
 import subprocess
 import sys
 import json
@@ -23,7 +24,6 @@ def get_base_dir():
     return Path(__file__).resolve().parent.parent
 
 BASE_DIR           = get_base_dir()
-API_CONFIG_PATH    = BASE_DIR / "config" / "api_keys.json"
 PROJECTS_DIR       = Path.home() / "Desktop" / "JarvisProjects"
 MAX_FIX_ATTEMPTS   = 4
 MODEL_PLANNER      = "gemini-2.5-flash"
@@ -31,8 +31,7 @@ MODEL_WRITER       = "gemini-2.5-flash-lite"
 
 
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    return os.getenv("GEMINI_API_KEY")
 
 
 def _get_model(model_name: str):

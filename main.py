@@ -9,7 +9,11 @@ from pathlib import Path
 import pyaudio
 from google import genai
 from google.genai import types
-import time 
+import time
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from ui import JarvisUI
 from memory.memory_manager import load_memory, update_memory, format_memory_for_prompt
 
@@ -38,23 +42,22 @@ def get_base_dir():
     return Path(__file__).resolve().parent
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 PROMPT_PATH     = BASE_DIR / "core" / "prompt.txt"
 LIVE_MODEL          = "models/gemini-2.5-flash-native-audio-preview-12-2025"
 FORMAT              = pyaudio.paInt16
 CHANNELS            = 1
 SEND_SAMPLE_RATE    = 16000
 RECEIVE_SAMPLE_RATE = 24000
-CHUNK_SIZE          = 1024
+CHUNK_SIZE          = 512
 
 pya = pyaudio.PyAudio()
 
+_CACHED_API_KEY = None
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
-    
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    global _CACHED_API_KEY
+    if _CACHED_API_KEY is None:
+        _CACHED_API_KEY = os.getenv("GEMINI_API_KEY")
+    return _CACHED_API_KEY
 
 def _load_system_prompt() -> str:
     try:
@@ -817,7 +820,7 @@ class JarvisLive:
                     self.session        = session
                     self._loop          = asyncio.get_event_loop() 
                     self.audio_in_queue = asyncio.Queue()
-                    self.out_queue      = asyncio.Queue(maxsize=10)
+                    self.out_queue      = asyncio.Queue(maxsize=50)
 
                     print("[JARVIS] ✅ Connected.")
                     self.ui.write_log("JARVIS online.")

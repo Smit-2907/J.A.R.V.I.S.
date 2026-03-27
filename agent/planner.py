@@ -1,3 +1,4 @@
+import os
 import json
 import re
 import sys
@@ -11,10 +12,9 @@ def get_base_dir() -> Path:
 
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
 
-PLANNER_PROMPT = """You are the planning module of MARK XXV, a personal AI assistant.
+PLANNER_PROMPT = """You are the planning module of Mark II, a personal AI assistant.
 Your job: break any user goal into a sequence of steps using ONLY the tools listed below.
 
 ABSOLUTE RULES:
@@ -151,9 +151,12 @@ OUTPUT — return ONLY valid JSON, no markdown, no explanation, no code blocks:
 """
 
 
+_CACHED_API_KEY = None
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    global _CACHED_API_KEY
+    if _CACHED_API_KEY is None:
+        _CACHED_API_KEY = os.getenv("GEMINI_API_KEY")
+    return _CACHED_API_KEY
 
 
 def create_plan(goal: str, context: str = "") -> dict:

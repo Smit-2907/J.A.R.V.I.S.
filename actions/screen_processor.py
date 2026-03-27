@@ -38,7 +38,6 @@ def get_base_dir():
     return Path(__file__).resolve().parent.parent
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
 LIVE_MODEL          = "models/gemini-2.5-flash-native-audio-preview-12-2025"
 FORMAT              = pyaudio.paInt16
@@ -61,67 +60,27 @@ SYSTEM_PROMPT = (
 )
 
 
+_CACHED_API_KEY = None
 def _get_api_key() -> str:
-    try:
-        with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-            keys = json.load(f)
-        key = keys.get("gemini_api_key", "")
-        if not key:
-            raise ValueError("gemini_api_key not found")
-        return key
-    except Exception as e:
-        raise RuntimeError(f"Could not load API key: {e}")
+    global _CACHED_API_KEY
+    if _CACHED_API_KEY is not None:
+        return _CACHED_API_KEY
+    key = os.getenv("GEMINI_API_KEY")
+    if not key:
+         raise ValueError("GEMINI_API_KEY not found in environment")
+    _CACHED_API_KEY = key
+    return key
 
 
 def _get_camera_index() -> int:
     """
-    Reads camera index from config.
-    If not set, auto-detects the best camera and saves it for future use.
-    Runs only once — after that, config value is used directly.
+    Reads camera index from environment.
+    Default: 0
     """
     try:
-        with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-            cfg = json.load(f)
-        if "camera_index" in cfg:
-            return int(cfg["camera_index"])
+        return int(os.getenv("CAMERA_INDEX", 0))
     except Exception:
-        pass
-
-    print("[Camera] 🔍 No camera index in config. Auto-detecting...")
-    best_index = 0
-
-    for idx in range(6):
-        cap = cv2.VideoCapture(idx, cv2.CAP_DSHOW)
-        if not cap.isOpened():
-            cap.release()
-            continue
-
-        for _ in range(5):
-            cap.read()
-
-        ret, frame = cap.read()
-        cap.release()
-
-        if ret and frame is not None and frame.mean() > 5:
-            best_index = idx
-            print(f"[Camera] ✅ Camera found at index {idx} — saving to config.")
-            break
-        else:
-            print(f"[Camera] ⚠️  Index {idx}: no valid frame (black or empty).")
-
-    try:
-        cfg = {}
-        if API_CONFIG_PATH.exists():
-            with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-                cfg = json.load(f)
-        cfg["camera_index"] = best_index
-        with open(API_CONFIG_PATH, "w", encoding="utf-8") as f:
-            json.dump(cfg, f, indent=4)
-        print(f"[Camera] 💾 Camera index {best_index} saved to config.")
-    except Exception as e:
-        print(f"[Camera] ⚠️  Could not save camera index: {e}")
-
-    return best_index
+        return 0
 
 
 def _to_jpeg(img_bytes: bytes) -> bytes:

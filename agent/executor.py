@@ -19,12 +19,14 @@ def get_base_dir() -> Path:
 
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
 
+_CACHED_API_KEY = None
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    global _CACHED_API_KEY
+    if _CACHED_API_KEY is None:
+        _CACHED_API_KEY = os.getenv("GEMINI_API_KEY")
+    return _CACHED_API_KEY
 
 def _run_generated_code(description: str, speak: Callable | None = None) -> str:
     import google.generativeai as genai

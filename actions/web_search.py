@@ -1,8 +1,4 @@
-# actions/web_search.py
-# MARK XXV — Web Search
-# Primary: Gemini google_search (yeni google.genai SDK)
-# Fallback: DuckDuckGo (ddgs)
-
+import os
 import json
 import sys
 from pathlib import Path
@@ -14,11 +10,13 @@ def get_base_dir() -> Path:
     return Path(__file__).resolve().parent.parent
 
 BASE_DIR        = get_base_dir()
-API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 
+_CACHED_API_KEY = None
 def _get_api_key() -> str:
-    with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)["gemini_api_key"]
+    global _CACHED_API_KEY
+    if _CACHED_API_KEY is None:
+        _CACHED_API_KEY = os.getenv("GEMINI_API_KEY")
+    return _CACHED_API_KEY
 
 
 def _gemini_search(query: str) -> str:
