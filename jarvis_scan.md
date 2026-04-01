@@ -1,4 +1,4 @@
-# 🤖 Mark II — Full Project Scan Report
+# 🤖 JARVIS — Full Project Scan Report
 
 > Generated: 2026-03-27 18:25 IST | Status: ✅ ALL SYSTEMS GREEN
 
@@ -7,11 +7,11 @@
 ## 📁 Directory Structure (Post-Migration)
 
 ```
-Mark II/                         (Root)
+JARVIS/                         (Root)
 ├── .env                         ⬅ SECURE — API key + camera index
 ├── .gitignore                   ⬅ Protects .env from GitHub
 ├── main.py                      (35.9 KB) Entry point — Gemini Live session
-├── ui.py                        (23.2 KB) Animated Mark II HUD (60fps Tkinter)
+├── ui.py                        (23.2 KB) Animated JARVIS HUD (60fps Tkinter)
 ├── setup.py                     (985 B)   Smart installer — uv-first, pip fallback
 ├── requirements.txt             (244 B)   20 dependencies incl. python-dotenv
 ├── readme.md                    (1.6 KB)  Setup guide with uv instructions
@@ -94,12 +94,11 @@ Mark II/                         (Root)
 |:---|:---:|
 | `MARK XXX` references in code | ✅ **0 found** |
 | `Mark-XXX` references in code | ✅ **0 found** |
-| `FatihMakes` references | ✅ **0 found** |
-| UI window title → Mark II | ✅ |
+| UI window title → JARVIS | ✅ |
 | UI footer → MARK II | ✅ |
-| README title → Mark II | ✅ |
-| Setup message → Mark II | ✅ |
-| Agent prompts → Mark II | ✅ |
+| README title → JARVIS | ✅ |
+| Setup message → JARVIS | ✅ |
+| Agent prompts → JARVIS | ✅ |
 
 ---
 
@@ -159,9 +158,9 @@ flowchart TD
 
 | Priority | Issue | Fix |
 |:---:|:---|:---|
-| 🟡 | `config/api_keys.json` still exists on disk | Safe to delete — no code reads it anymore |
-| 🟡 | `core/prompt.txt` still says "JARVIS" not "Mark II" | Optional: update persona name |
-| 🟡 | `screen_processor.py` SYSTEM_PROMPT says "JARVIS" | Optional: update to Mark II |
+| ✅ | `config/api_keys.json` removed from disk | Legacy file deleted |
+| ✅ | `core/prompt.txt` updated to "JARVIS" | Persona name updated |
+| ✅ | `screen_processor.py` SYSTEM_PROMPT updated to "JARVIS" | Persona name updated |
 | 🟢 | `screen_processor.py` runs a separate Gemini session | Consider merging to save tokens |
 | 🟢 | No `uv.lock` file | Run `uv pip compile` to lock versions |
 
@@ -172,9 +171,9 @@ flowchart TD
 ```powershell
 pip install uv          # One-time: install fast package manager
 python setup.py         # Install all dependencies via uv
-python main.py          # Launch Mark II
+python main.py          # Launch JARVIS
 ```
 
 ---
 
-*Mark II Audit System — All systems nominal* ✅
+*JARVIS Audit System — All systems nominal* ✅

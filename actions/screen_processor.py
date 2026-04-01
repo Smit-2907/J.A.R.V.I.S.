@@ -50,7 +50,7 @@ IMG_MAX_H = 360
 JPEG_Q    = 55
 
 SYSTEM_PROMPT = (
-    "You are JARVIS from Iron Man movies. "
+    "You are JARVIS, a sharp and efficient AI assistant. "
     "Analyze images with technical precision and intelligence. "
     "Help the user in a way they can understand — don't be overly complex. "
     "Be concise, smart, and helpful like Tony Stark's AI assistant. "
@@ -250,7 +250,7 @@ class _LiveSession:
                     if transcript_buf and self._player:
                         full = re.sub(r'\s+', ' ', " ".join(transcript_buf)).strip()
                         if full:
-                            self._player.write_log(f"Jarvis: {full}")
+                            self._player.write_log(f"JARVIS: {full}")
                             print(f"[ScreenProcess] 💬 {full}")
                     transcript_buf = []
 

@@ -19,11 +19,11 @@ BASE_DIR   = get_base_dir()
 CONFIG_DIR = BASE_DIR / "config"
 ENV_FILE   = BASE_DIR / ".env"
 
-SYSTEM_NAME = "J.A.R.V.I.S"
-MODEL_BADGE = "Mark II"
+SYSTEM_NAME = "JARVIS"
+MODEL_BADGE = "Project"
 SUBTITLE    = "Just A Rather Very Intelligent System"
 
-# ── Marvel JARVIS Colour Palette ──────────────────────────────────────────────
+# ── JARVIS Colour Palette ───────────────────────────────────────────────────
 C_BG      = "#010810"   # near-black navy
 C_PRI     = "#00c8ff"   # holographic cyan
 C_GOLD    = "#e8a020"   # arc-reactor gold
@@ -38,7 +38,7 @@ C_RED     = "#ff3333"
 C_WHITE   = "#d0eeff"
 
 
-class JarvisUI:
+class MarkIIUI:
 
     def __init__(self, face_path, size=None):
         self.root = tk.Tk()
@@ -185,7 +185,7 @@ class JarvisUI:
             self._data_right = [f"{random.uniform(0,999):.3f}" for _ in range(8)]
 
         self._draw()
-        self.root.after(16, self._animate)
+        self.root.after(32, self._animate)
 
     # ── draw ──────────────────────────────────────────────────────────────────
 
@@ -537,7 +537,7 @@ class JarvisUI:
                  fg=C_GOLD, bg="#00060e",
                  font=("Courier", 14, "bold")).pack(pady=(20, 4))
         tk.Label(self.setup_frame,
-                 text="Enter your Gemini API key to bring J.A.R.V.I.S online.",
+                 text="Enter your Gemini API key to bring JARVIS online.",
                  fg=C_MID, bg="#00060e",
                  font=("Courier", 9)).pack(pady=(0, 12))
 
@@ -572,4 +572,4 @@ class JarvisUI:
         self.setup_frame.destroy()
         self._api_key_ready = True
         self.status_text = "ONLINE"
-        self.write_log("SYS: Systems initialised. J.A.R.V.I.S online.")
+        self.write_log("SYS: Systems initialised. JARVIS online.")

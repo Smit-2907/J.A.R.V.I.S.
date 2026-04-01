@@ -1,5 +1,5 @@
 # actions/open_app.py
-# Mark II — Cross-Platform App Launcher
+# JARVIS — Cross-Platform App Launcher
 
 import time
 import subprocess

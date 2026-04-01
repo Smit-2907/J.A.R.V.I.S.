@@ -22,7 +22,7 @@ def run_setup():
 
     mgr_name = "uv" if has_uv else "pip"
     print(f"\n✅ Setup complete! Systems ready via {mgr_name}.")
-    print("Run 'python main.py' to bring Mark II online, sir.")
+    print("Run 'python main.py' to bring JARVIS online, sir.")
 
 if __name__ == "__main__":
     run_setup()

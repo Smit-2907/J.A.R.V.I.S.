@@ -1,5 +1,5 @@
 # actions/computer_settings.py
-# Mark II — Computer Settings & UI Controls
+# JARVIS — Computer Settings & UI Controls
 #
 # Kullanıcı "sesi aç", "uygulamayı kapat", "tam ekran yap", "şunu yaz" gibi
 # bilgisayar kontrol komutları verdiğinde bu dosya devreye girer.

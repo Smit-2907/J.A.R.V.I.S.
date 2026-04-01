@@ -1,5 +1,5 @@
 # actions/flight_finder.py
-# Mark II — Flight Finder
+# JARVIS — Flight Finder
 #
 # Searches for flights using Google Flights via browser_control.
 # Results are spoken by JARVIS. Optionally saved to Notepad or opened in browser.

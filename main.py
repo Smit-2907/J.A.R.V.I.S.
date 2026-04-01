@@ -12,9 +12,9 @@ from google.genai import types
 import time
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
-from ui import JarvisUI
+from ui import MarkIIUI
 from memory.memory_manager import load_memory, update_memory, format_memory_for_prompt
 
 from agent.task_queue import get_queue
@@ -43,12 +43,12 @@ def get_base_dir():
 
 BASE_DIR        = get_base_dir()
 PROMPT_PATH     = BASE_DIR / "core" / "prompt.txt"
-LIVE_MODEL          = "models/gemini-2.5-flash-native-audio-preview-12-2025"
+LIVE_MODEL          = "models/gemini-3.1-flash-live-preview" 
 FORMAT              = pyaudio.paInt16
 CHANNELS            = 1
 SEND_SAMPLE_RATE    = 16000
 RECEIVE_SAMPLE_RATE = 24000
-CHUNK_SIZE          = 512
+CHUNK_SIZE          = 1024
 
 pya = pyaudio.PyAudio()
 
@@ -61,13 +61,15 @@ def _get_api_key() -> str:
 
 def _load_system_prompt() -> str:
     try:
-        return PROMPT_PATH.read_text(encoding="utf-8")
+        if PROMPT_PATH.exists():
+            return PROMPT_PATH.read_text(encoding="utf-8")
     except Exception:
-        return (
-            "You are JARVIS, Tony Stark's AI assistant. "
-            "Be concise, direct, and always use the provided tools to complete tasks. "
-            "Never simulate or guess results — always call the appropriate tool."
-        )
+        pass
+    return (
+        "You are JARVIS, Tony Stark's AI assistant. "
+        "Be concise, direct, and always use the provided tools to complete tasks. "
+        "Never simulate or guess results — always call the appropriate tool."
+    )
 
 _memory_turn_counter  = 0
 _memory_turn_lock     = threading.Lock()
@@ -476,14 +478,15 @@ TOOL_DECLARATIONS = [
 }
 ]
 
-class JarvisLive:
+class MarkIILive:
 
-    def __init__(self, ui: JarvisUI):
+    def __init__(self, ui: MarkIIUI):
         self.ui             = ui
         self.session        = None
         self.audio_in_queue = None
         self.out_queue      = None
         self._loop          = None
+        self._session_active = False # Flag to control mic thread
 
     def speak(self, text: str):
         """Thread-safe speak — any thread can call this."""
@@ -525,7 +528,6 @@ class JarvisLive:
             input_audio_transcription={},
             system_instruction=sys_prompt,
             tools=[{"function_declarations": TOOL_DECLARATIONS}],
-            session_resumption=types.SessionResumptionConfig(),
             speech_config=types.SpeechConfig(
                 voice_config=types.VoiceConfig(
                     prebuilt_voice_config=types.PrebuiltVoiceConfig(
@@ -695,7 +697,7 @@ class JarvisLive:
     async def _send_realtime(self):
         while True:
             msg = await self.out_queue.get()
-            await self.session.send_realtime_input(media=msg)
+            await self.session.send_realtime_input(audio=msg)
 
     async def _listen_audio(self):
         print("[JARVIS] 🎤 Mic started")
@@ -707,16 +709,27 @@ class JarvisLive:
             input=True,
             frames_per_buffer=CHUNK_SIZE,
         )
+        self._session_active = True
+        def mic_thread():
+            try:
+                while self._session_active:
+                    data = stream.read(CHUNK_SIZE, exception_on_overflow=False)
+                    if self._session_active:
+                        self._loop.call_soon_threadsafe(
+                            lambda: self.out_queue.put_nowait({"data": data, "mime_type": "audio/pcm"}) if not self.out_queue.full() else None
+                        )
+            except Exception as e:
+                print(f"[JARVIS] ❌ Mic error: {e}")
+
+        threading.Thread(target=mic_thread, daemon=True).start()
+        
         try:
-            while True:
-                data = await asyncio.to_thread(
-                    stream.read, CHUNK_SIZE, exception_on_overflow=False
-                )
-                await self.out_queue.put({"data": data, "mime_type": "audio/pcm"})
+            while self._session_active:
+                await asyncio.sleep(0.5)
         except Exception as e:
-            print(f"[JARVIS] ❌ Mic error: {e}")
             raise
         finally:
+            self._session_active = False # Stop the thread
             stream.close()
 
     async def _receive_audio(self):
@@ -730,6 +743,7 @@ class JarvisLive:
                 async for response in turn:
 
                     if response.data:
+                        self.ui.start_speaking()
                         self.audio_in_queue.put_nowait(response.data)
 
                     if response.server_content:
@@ -758,25 +772,40 @@ class JarvisLive:
                             if out_buf:
                                 full_out = " ".join(out_buf).strip()
                                 if full_out:
-                                    self.ui.write_log(f"Jarvis: {full_out}")
+                                    self.ui.write_log(f"JARVIS: {full_out}")
                             out_buf = []
 
                             if full_in and len(full_in) > 5:
+                                # Echo suppression: ignore if user input is too similar to AI's last output
+                                last_out = full_out.lower().strip()
+                                curr_in  = full_in.lower().strip()
+                                if last_out and (last_out in curr_in or curr_in in last_out):
+                                    print(f"[JARVIS] 🚫 Echo detected, ignoring: {full_in}")
+                                    in_buf = []
+                                    continue
+
                                 threading.Thread(
                                     target=_update_memory_async,
                                     args=(full_in, full_out),
                                     daemon=True
                                 ).start()
 
+                        if sc.turn_complete:
+                            self.ui.stop_speaking()
+
                     if response.tool_call:
                         fn_responses = []
                         for fc in response.tool_call.function_calls:
+                            saved_status = self.ui.status_text
+                            self.ui.status_text = f"RUNNING {fc.name.upper()}"
                             print(f"[JARVIS] 📞 Tool call: {fc.name}")
                             fr = await self._execute_tool(fc)
                             fn_responses.append(fr)
+                            self.ui.status_text = saved_status
                         await self.session.send_tool_response(
                             function_responses=fn_responses
                         )
+                        self.ui.status_text = "ONLINE"
 
         except Exception as e:
             print(f"[JARVIS] ❌ Recv error: {e}")
@@ -805,18 +834,19 @@ class JarvisLive:
     async def run(self):
         client = genai.Client(
             api_key=_get_api_key(),
-            http_options={"api_version": "v1beta"}
         )
 
         while True:
             try:
-                print("[JARVIS] 🔌 Connecting...")
+                print(f"[JARVIS] 🔌 Connecting to {LIVE_MODEL}...")
                 config = self._build_config()
+                print("[JARVIS] ⚙️  Config built. Requesting live connection (15s timeout)...")
 
-                async with (
-                    client.aio.live.connect(model=LIVE_MODEL, config=config) as session,
-                    asyncio.TaskGroup() as tg,
-                ):
+                try:
+                    cm = client.aio.live.connect(model=LIVE_MODEL, config=config)
+                    async with asyncio.timeout(30): # Increased timeout
+                        session = await cm.__aenter__()
+                    
                     self.session        = session
                     self._loop          = asyncio.get_event_loop() 
                     self.audio_in_queue = asyncio.Queue()
@@ -825,25 +855,36 @@ class JarvisLive:
                     print("[JARVIS] ✅ Connected.")
                     self.ui.write_log("JARVIS online.")
 
-                    tg.create_task(self._send_realtime())
-                    tg.create_task(self._listen_audio())
-                    tg.create_task(self._receive_audio())
-                    tg.create_task(self._play_audio())
+                    try:
+                        async with asyncio.TaskGroup() as tg:
+                            tg.create_task(self._send_realtime())
+                            tg.create_task(self._listen_audio())
+                            tg.create_task(self._receive_audio())
+                            tg.create_task(self._play_audio())
+                    finally:
+                        await cm.__aexit__(None, None, None)
+
+                except TimeoutError:
+                    print("[JARVIS] 📡 Connection timed out after 30s.")
+                except Exception as e:
+                    print(f"[JARVIS] 🔌 Connection attempt failed: {e}")
+                    raise
 
             except Exception as e:
-                print(f"[JARVIS] ⚠️  Error: {e}")
+                import sys
+                print(f"[JARVIS] ⚠️  Fatal Error: {e}", file=sys.stderr)
                 traceback.print_exc()
 
             print("[JARVIS] 🔄 Reconnecting in 3s...")
             await asyncio.sleep(3)
 
 def main():
-    ui = JarvisUI("face.png")
+    ui = MarkIIUI("face.png")
 
     def runner():
         ui.wait_for_api_key()
         
-        jarvis = JarvisLive(ui)
+        jarvis = MarkIILive(ui)
         try:
             asyncio.run(jarvis.run())
         except KeyboardInterrupt:

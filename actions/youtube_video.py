@@ -1,5 +1,5 @@
 # actions/youtube_video.py
-# Mark II — YouTube Controller
+# JARVIS — YouTube Controller
 #
 # Features:
 #   - play      : Search and play a YouTube video (original feature, preserved)
@@ -41,6 +41,7 @@ def get_base_dir() -> Path:
 
 
 BASE_DIR        = get_base_dir()
+PROJECTS_DIR    = Path.home() / "Desktop" / "JarvisProjects"
 
 HEADERS = {
     "User-Agent": (
@@ -108,7 +109,7 @@ def find_video_thumbnails() -> list[tuple[int, int]]:
         return filtered
 
     except Exception as e:
-        print(f"[YouTube] ⚠️ Thumbnail detection failed: {e}")
+        print(f"[JARVIS] ⚠️ Thumbnail detection failed: {e}")
         return []
 
 
@@ -135,13 +136,13 @@ def _ask_for_url(prompt_text: str = "YouTube video URL:") -> str | None:
             root.withdraw()
 
         url = simpledialog.askstring(
-            "J.A.R.V.I.S",
+            "JARVIS",
             prompt_text,
             parent=root
         )
         return url.strip() if url else None
     except Exception as e:
-        print(f"[YouTube] ⚠️ URL dialog failed: {e}")
+        print(f"[JARVIS] ⚠️ URL dialog failed: {e}")
         return None
 
 
@@ -151,7 +152,7 @@ def _is_valid_youtube_url(url: str) -> bool:
 def _get_transcript(video_id: str) -> str | None:
 
     if not _TRANSCRIPT_OK:
-        print("[YouTube] ⚠️ youtube-transcript-api not installed.")
+        print("[JARVIS] ⚠️ youtube-transcript-api not installed.")
         return None
 
     try:
@@ -180,11 +181,11 @@ def _get_transcript(video_id: str) -> str | None:
 
         fetched = transcript.fetch()
         text    = " ".join(entry["text"] for entry in fetched)
-        print(f"[YouTube] 📝 Transcript: {len(text)} chars")
+        print(f"[JARVIS] 📝 Transcript: {len(text)} chars")
         return text
 
     except Exception as e:
-        print(f"[YouTube] ⚠️ Transcript fetch failed: {e}")
+        print(f"[JARVIS] ⚠️ Transcript fetch failed: {e}")
         return None
 
 def _summarize_with_gemini(transcript: str, video_url: str) -> str:
@@ -217,9 +218,8 @@ def _save_to_notepad(content: str, video_url: str) -> str:
 
     ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"youtube_summary_{ts}.txt"
-    desktop  = Path.home() / "Desktop"
-    desktop.mkdir(parents=True, exist_ok=True)
-    filepath = desktop / filename
+    PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
+    filepath = PROJECTS_DIR / filename
 
     header = (
         f"JARVIS — YouTube Summary\n"
@@ -230,7 +230,7 @@ def _save_to_notepad(content: str, video_url: str) -> str:
     )
 
     filepath.write_text(header + content, encoding="utf-8")
-    print(f"[YouTube] 💾 Summary saved: {filepath}")
+    print(f"[JARVIS] 💾 Summary saved: {filepath}")
 
     system  = platform.system()
     open_fn = {
@@ -281,7 +281,7 @@ def _scrape_video_info(video_id: str) -> dict:
         return info
 
     except Exception as e:
-        print(f"[YouTube] ⚠️ Info scrape failed: {e}")
+        print(f"[JARVIS] ⚠️ Info scrape failed: {e}")
         return {}
 
 def _scrape_trending(region: str = "TR", max_results: int = 8) -> list[dict]:
@@ -311,7 +311,7 @@ def _scrape_trending(region: str = "TR", max_results: int = 8) -> list[dict]:
         return results
 
     except Exception as e:
-        print(f"[YouTube] ⚠️ Trending scrape failed: {e}")
+        print(f"[JARVIS] ⚠️ Trending scrape failed: {e}")
         return []
 
 def _handle_play(parameters: dict, player) -> str:
@@ -320,7 +320,7 @@ def _handle_play(parameters: dict, player) -> str:
         return "Please tell me what you'd like to watch, sir."
 
     if player:
-        player.write_log(f"[YouTube] Searching: {query}")
+        player.write_log(f"JARVIS: Searching: {query}")
 
     open_browser()
 
@@ -337,18 +337,18 @@ def _handle_play(parameters: dict, player) -> str:
 
     if len(thumbnails) >= 2:
         x, y = thumbnails[1]
-        print(f"[YouTube] 🎯 Clicking 2nd thumbnail at ({x}, {y})")
+        print(f"[JARVIS] 🎯 Clicking 2nd thumbnail at ({x}, {y})")
         pyautogui.click(x, y)
         return f"Playing YouTube video for: {query}"
 
     elif len(thumbnails) == 1:
         x, y = thumbnails[0]
-        print(f"[YouTube] ⚠️ One thumbnail found, clicking at ({x}, {y})")
+        print(f"[JARVIS] ⚠️ One thumbnail found, clicking at ({x}, {y})")
         pyautogui.click(x, y)
         return f"Playing YouTube video for: {query}"
 
     else:
-        print("[YouTube] ⚠️ No thumbnails found, using fallback position")
+        print("[JARVIS] ⚠️ No thumbnails found, using fallback position")
         screen_w, screen_h = pyautogui.size()
         pyautogui.click(screen_w // 2, int(screen_h * 0.45))
         return f"Attempted to play YouTube video for: {query}"
@@ -374,7 +374,7 @@ def _handle_summarize(parameters: dict, player, speak) -> str:
         return "Could not extract video ID from that URL, sir."
 
     if player:
-        player.write_log(f"[YouTube] Summarizing: {url}")
+        player.write_log(f"[JARVIS] Summarizing: {url}")
 
     if speak:
         speak("Fetching the transcript now, sir. One moment.")

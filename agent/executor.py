@@ -117,7 +117,7 @@ def _inject_context(params: dict, tool: str, step_results: dict, goal: str = "")
 
     if tool == "file_controller" and params.get("action") in ("write", "create_file"):
         content = params.get("content", "")
-        if not content or len(content) < 50:
+        if not params.get("content"):
             all_results = [
                 v for v in step_results.values()
                 if v and len(v) > 100 and v not in ("Done.", "Completed.")
