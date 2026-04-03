@@ -17,6 +17,7 @@ JARVIS is a real-time, voice-driven AI ecosystem that can **hear, see, and contr
     *   **Travel**: Real-time Google Flights search and tracking
     *   **Productivity**: Reminder system, File Controller, Dev Agent (Full project builder)
     *   **Search**: Intelligent web search with result synthesis
+*   **📈 Intelligence & Learning (Extension)**: A modular layer that logs sessions, analyzes user patterns/sentiment, and uses Machine Learning to predict and prevent system failures.
 
 ---
 
@@ -29,6 +30,7 @@ JARVIS is built on a modular "Brain & Core" architecture:
 3.  **The Planner (agent/planner.py)**: Translates human language into a sequence of executable tool calls using advanced reasoning.
 4.  **The Executor (agent/executor.py)**: Safely runs each tool step, handles errors, and performs automatic recovery if a step fails.
 5.  **The Tool Registry (actions/)**: A library of 16+ modules that allow the AI to interact with Windows, the web, and external APIs.
+6.  **The Intelligence Layer (jarvis_extension/)**: Asynchronous logging and analysis system with MongoDB integration and ML success prediction.
 
 ---
 

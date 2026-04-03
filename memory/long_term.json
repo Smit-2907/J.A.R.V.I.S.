@@ -1,0 +1,18 @@
+{
+  "identity": {
+    "name": {
+      "value": "Chávez"
+    }
+  },
+  "preferences": {
+    "hobby": {
+      "value": "coding"
+    }
+  },
+  "relationships": {},
+  "notes": {
+    "job": {
+      "value": "coder"
+    }
+  }
+}

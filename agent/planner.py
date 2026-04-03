@@ -14,7 +14,8 @@ def get_base_dir() -> Path:
 BASE_DIR        = get_base_dir()
 
 
-PLANNER_PROMPT = """You are the planning module of JARVIS, a personal AI assistant.
+PLANNER_PROMPT = """You are the planning module of JARVIS, a personal AI assistant with an integrated Intelligence & Learning module. 
+You are aware of your system health, user patterns, and session logs, which you use to optimize your plans.
 Your job: break any user goal into a sequence of steps using ONLY the tools listed below.
 
 ABSOLUTE RULES:

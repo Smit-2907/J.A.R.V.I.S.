@@ -1,0 +1,16 @@
+{
+  "generations": [
+    {
+      "timestamp": "20260402_000412",
+      "file": "agent/executor.py",
+      "reason": "1.  **Contextual Intelligence Gap**: Logs showed the `code_helper` tool failing to \"explain\" because it received empty input, even though a previous step had relevant data. I've enhanced `_inject_context` to automatically bridge data between steps when parameters are missing.\n2.  **Tool Registry Pattern**: Replaced the fragile `if/elif` chain with a dynamic `ToolRegistry`. This uses `importlib` for lazy-loading, reducing memory overhead and making the system more modular.\n3.  **Self-Healing Code Execution**: Improved `_run_generated_code` with a more robust system prompt and a \"pip-install\" awareness. It now handles environment path resolution more reliably across platforms.\n4.  **Advanced Design Patterns**: Implemented type hinting, better error encapsulation, and a recursive context injector that handles nested tool parameters.\n5.  **Resilience**: Added a fallback mechanism in `_call_tool` so that if a specific tool fails to load or is missing, it automatically attempts to solve the problem via `generated_code`.",
+      "backup": "agent_executor.py_20260402_000412.bak"
+    },
+    {
+      "timestamp": "20260402_003518",
+      "file": "main.py",
+      "reason": "1. **Fixed Logic Errors**: The `_receive_audio` loop had an indentation error where the processing logic was placed after a `break` statement, making it unreachable.\n2. **Resolved Vision Conflict**: Added a `_vision_active` flag and updated the `screen_process` tool result to explicitly instruct the model to remain silent. This prevents the \"Ready when you are\" double-talk observed in the logs.\n3. **Improved Echo Suppression**: Enhanced the logic that compares user input to previous AI output to prevent the loop where JARVIS responds to his own voice.\n4. **Missing Imports**: Added `import subprocess` which was being used but not imported.\n5. **Stark Mode Integration**: Unified the `ClapDetector` callback with the `trigger_stark_mode` method for consistent behavior.\n6. **Memory Stability**: Ensured `google.generativeai` is properly handled within the async memory updater to prevent crashes if the library isn't globally configured.\n7. **Audio Queue Management**: Added a mechanism to clear the audio input queue when a new turn starts to reduce latency/overlap."
+    }
+  ],
+  "last_evolve": "20260402_000412"
+}

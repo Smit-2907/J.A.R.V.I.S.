@@ -1,0 +1,9 @@
+{
+  "main.py": 1.0,
+  "ui.py": 1.0,
+  "agent/executor.py": 1.0,
+  "agent/planner.py": 1.0,
+  "actions/screen_processor.py": 1.0,
+  "actions/code_helper.py": 1.0,
+  "actions/browser_control.py": 1.0
+}

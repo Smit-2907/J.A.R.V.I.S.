@@ -34,6 +34,15 @@ JARVIS/                         (Root)
 │   ├── task_queue.py            (7.3 KB)  Priority task queue (LOW/NORMAL/HIGH)
 │   └── error_handler.py         (6.6 KB)  Error classification (RETRY/SKIP/FIX/ABORT)
 │
+│
+├── jarvis_extension/           ⬅ NEW — Intelligence Layer
+│   ├── db.py                    MongoDB & fallback storage
+│   ├── logger.py                Async event-based logging
+│   ├── middleware.py            Integration wrappers & decorators
+│   ├── brain.py                 Sentiment & pattern analysis
+│   ├── insights.py              Actionable data engine
+│   └── test_extension.py        Simulation & test suite
+│
 └── actions/                     16 tool modules
     ├── browser_control.py       (16.8 KB) Playwright browser automation
     ├── cmd_control.py           (8.9 KB)  Natural-language → CMD commands
@@ -109,6 +118,9 @@ flowchart TD
     A[User Voice] -->|PCM 16kHz| B(Gemini Live API)
     B -->|Audio 24kHz| C[Speaker]
     B -->|Tool Call| D{Tool Dispatcher}
+    B -.->|Async Logs| I(Intelligence Layer)
+    I -->|Write| J[(MongoDB / JSON)]
+    J -->|Load| K[Brain / Insights]
 
     D --> E[16 Action Modules]
     D --> F[Agent Task]
@@ -151,6 +163,9 @@ flowchart TD
 | `youtube-transcript-api` | YouTube subtitles |
 | `beautifulsoup4` | HTML parsing |
 | `requests` | HTTP calls |
+| `pymongo` | MongoDB connection & storage |
+| `textblob` | Sentiment Analysis |
+| `scikit-learn` | Optional ML success prediction |
 
 ---
 
