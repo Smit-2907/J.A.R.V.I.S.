@@ -18,3 +18,7 @@ win10toast
 duckduckgo-search
 youtube-transcript-api
 python-dotenv
+pymongo
+textblob
+scikit-learn
+joblib

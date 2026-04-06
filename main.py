@@ -16,6 +16,7 @@ load_dotenv(override=True)
 
 from ui import MarkIIUI
 from memory.memory_manager import load_memory, update_memory, format_memory_for_prompt
+from jarvis_extension.logger import jarvis_logger
 
 from agent.task_queue import get_queue
 
@@ -49,7 +50,6 @@ CHANNELS            = 1
 SEND_SAMPLE_RATE    = 16000
 RECEIVE_SAMPLE_RATE = 24000
 CHUNK_SIZE          = 1024
-
 pya = pyaudio.PyAudio()
 
 _CACHED_API_KEY = None
@@ -546,6 +546,9 @@ class MarkIILive:
         loop   = asyncio.get_event_loop()
         result = "Done."
 
+        # Log intent and parameters via Intelligence layer
+        jarvis_logger.intent("CURRENT_SESSION", name, **args)
+
         try:
             if name == "open_app":
                 r = await loop.run_in_executor(
@@ -684,6 +687,7 @@ class MarkIILive:
             
         except Exception as e:
             result = f"Tool '{name}' failed: {e}"
+            jarvis_logger.error("CURRENT_SESSION", result, tool=name, traceback=traceback.format_exc())
             traceback.print_exc()
 
         print(f"[JARVIS] 📤 {name} → {result[:80]}")
@@ -767,12 +771,14 @@ class MarkIILive:
                                 full_in = " ".join(in_buf).strip()
                                 if full_in:
                                     self.ui.write_log(f"You: {full_in}")
+                                    jarvis_logger.user_input("CURRENT_SESSION", full_in)
                             in_buf = []
 
                             if out_buf:
                                 full_out = " ".join(out_buf).strip()
                                 if full_out:
                                     self.ui.write_log(f"JARVIS: {full_out}")
+                                    jarvis_logger.output("CURRENT_SESSION", full_out)
                             out_buf = []
 
                             if full_in and len(full_in) > 5:
